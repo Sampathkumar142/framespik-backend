@@ -17,7 +17,11 @@ from django.contrib import admin
 from django.urls import path, include
 import debug_toolbar
 from users.views import UserViewSet
-
+from django.conf import settings
+from django.conf.urls.static import static
+from event.views import eventwebpage,albumimagewebpage,getEventInvitation,imageSelection
+from organization.views import organizationWebPage,getOrganizationEcard
+from users.views import phone_login,verify,logout_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,4 +32,16 @@ urlpatterns = [
     path('auth/users/<int:id>/', UserViewSet.as_view({'get': 'retrieve' }), name='user-detail'),
     path('auth/users/me/', UserViewSet.as_view({'get': 'me'}), name='me'),
     path('auth/',include('djoser.urls')),
-]
+    path('memories/<uniquecode>',eventwebpage),
+    path('memories/<uniquecode>/a/<int:pk>',albumimagewebpage),
+    path('event/invite/<uniquecode>',getEventInvitation),
+    path('organization/<uniquecode>',organizationWebPage),
+    path('organization/ecard/<uniquecode>',getOrganizationEcard),
+    path('imageselection/<int:event_id>/<int:album_id>',imageSelection),
+    path('login/', phone_login, name='login'),
+    path('verify/', verify, name='verify'),
+    path('logout/', logout_view, name='logout'),
+
+    ]
+
+urlpatterns+=static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT) 

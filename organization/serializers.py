@@ -218,3 +218,29 @@ class CustomPlanCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         customplan = models.CustomPlan.create_with_price(name=validated_data['name'],features=validated_data['features'])
         return customplan
+    
+
+class OrganizationWebPageTemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.OrganizationWebpageTemplate
+        fields = ['id','templateName','templateOverview','htmlFile','uploadedAt']
+
+
+class OrganizationWebPageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.OrganizationWebpage
+        fields = ['uuid','organization','template','isActive','isPublic','passCode']
+
+
+
+class OrganizationEcardTemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.OrganizationEcardTemplate
+        fields = ['id','templateName','templateOverview','htmlFile','uploadedAt']
+
+
+
+class OrganizationEcardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.OrganizationEcard
+        fields = ['uuid','organization','template','isActive','passCode']

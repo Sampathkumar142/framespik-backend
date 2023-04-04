@@ -11,8 +11,8 @@ from .models import Organization
 
 class FeaturePermissionBackend(BaseBackend):
     def has_perm(self, user_obj, perm, obj=None):
-        if not user_obj.is_authenticated:
-            return False
+        # if not user_obj.is_authenticated:
+        #     return False
 
         if not obj or not isinstance(obj, Organization):
             return False

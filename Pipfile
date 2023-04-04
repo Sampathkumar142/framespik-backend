@@ -11,6 +11,11 @@ drf-nested-routers = "*"
 djoser = "*"
 django-debug-toolbar = "*"
 pillow = "*"
+django-filter = "*"
+channels = "*"
+channels-redis = "*"
+daphne = "*"
+redis = "*"
 
 [dev-packages]
 autopep8 = "*"

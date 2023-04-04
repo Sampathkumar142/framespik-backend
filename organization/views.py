@@ -17,7 +17,9 @@ from django.contrib.auth.decorators import permission_required
 from utilitys.pCloud import getItemsInFolder,deleteFolder,deleteFile,createFolder,uploadFile,getAccountInfo
 from .pcloud import register,getAuth
 from event.serializers import OrganizationEventScheduleSerializer
-
+from django_filters.rest_framework import DjangoFilterBackend
+from django.shortcuts import render,HttpResponse
+from django.contrib.sites.models import Site
 
 
 
@@ -53,9 +55,7 @@ class OrganizationPortifolioViewSet(ModelViewSet):
     
 
 class OrganizationInfoViewSet(APIView):
-    def get(self,request,*args,**kwargs):
-        print(register('praveensampathkumar.parvathini@gmail.com','sampath@123'))
-        return Response("ok")
+
         
     def post(self,request,*args,**kwargs):
         organization_id = request.data.get('organization_id')
@@ -172,3 +172,100 @@ class ScheduleView(APIView):
             organizationeventserializer = OrganizationEventScheduleSerializer(organizationeventschedule,many =True)
             data.update({'eventschedules':organizationeventserializer.data})
         return Response(data,status=status.HTTP_200_OK)
+
+
+
+class OrganizationViewsSet(APIView):
+    def get(self,request,*args,**kwargs):
+        organization = self.request.query_params.get('organization_id',None)
+        webview = self.request.query_params.get('webview',0)
+        appview = self.request.query_params.get('appview',0)
+        promotionalview = self.request.query_params.get('promotionview',0)
+        if organization is not None:
+            try:
+                view,created = models.OrganizationViews.objects.get_or_create(organization_id = organization)
+            except models.OrganizationViews.DoesNotExist:
+                    return Response(status=status.HTTP_404_NOT_FOUND)
+            if webview :
+                view.webViews +=1
+                view.save()
+            if appview:
+                view.appViews +=1
+                view.save()
+            if promotionalview:
+                view.promotionalViews +=1
+                view.save()
+            return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+              
+
+
+
+class OrganizationWebPageTemplateViewSet(ModelViewSet):
+    serializer_class = serializers.OrganizationWebPageTemplateSerializer
+    queryset = models.OrganizationWebpageTemplate.objects.all()
+
+
+
+class OrganizationWebpageViewSet(ModelViewSet):
+    filter_backends=[DjangoFilterBackend]
+    filterset_fields = ['organization_id']
+    serializer_class = serializers.OrganizationWebPageSerializer
+    queryset = models.OrganizationWebpage.objects.all()
+
+
+
+
+
+class OrganizationEcardTemplateViewSet(ModelViewSet):
+    serializer_class = serializers.OrganizationEcardTemplateSerializer
+    queryset = models.OrganizationEcardTemplate.objects.all()
+
+
+
+class OrganizationEcardViewSet(ModelViewSet):
+    filter_backends=[DjangoFilterBackend]
+    filterset_fields = ['organization_id']
+    serializer_class = serializers.OrganizationEcardSerializer
+    queryset = models.OrganizationEcard.objects.all()
+
+
+
+
+
+
+def organizationWebPage(request,uniquecode):
+    try:
+        webpage =models.OrganizationWebpage.objects.select_related('organization').get(passCode = uniquecode)
+        if webpage.isActive and webpage.isPublic:
+            organizationandwebpagedata = models.OrganizationWebpage.get_template_data(webpage)
+            organizationEcard = models.OrganizationEcard.objects.filter(organization_id=webpage.organization.id)
+            current_site = Site.objects.get_current()
+            domain = current_site.domain
+            data = {
+                'organizationandwebpagedata':organizationandwebpagedata,
+                'organizationEcard' : [{'id':i.pk,'ecard_url':f'{domain}/organization/ecard/{i.passCode}'} for i in organizationEcard]
+            }
+            print(data)
+            return render(request,'webpage.html',data)
+        return HttpResponse("webpage is not Active",status = status.HTTP_423_LOCKED)
+    except models.OrganizationWebpage.DoesNotExist:
+        return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+def getOrganizationEcard(request,uniquecode):
+    try: 
+        organizationecard = models.OrganizationEcard.objects.select_related('organization').get(passCode = uniquecode)
+        data={}
+        if organizationecard.isActive :
+            organizationandecarddata = models.OrganizationEcard.get_template_data(organizationecard)
+            data={'organizationandecarddata':organizationandecarddata}
+            print(data)
+            return render(request,'ecard.html',data)
+        
+        else:
+            return HttpResponse({"ecard is not Active"},status = status.HTTP_423_LOCKED)
+    except models.OrganizationEcard.DoesNotExist :
+        return HttpResponse(status=status.HTTP_400_BAD_REQUEST)

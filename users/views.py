@@ -1,4 +1,5 @@
 from  rest_framework.views import APIView
+from django.shortcuts import render,redirect
 from .models import User,customerOtpStack,OrganizationUser,Affiliate,Customer,Employee,Marketer
 import random
 from rest_framework import status
@@ -12,6 +13,14 @@ from djoser.views import UserViewSet as BaseUserViewSet
 from django.shortcuts import get_object_or_404
 from rest_framework.mixins import CreateModelMixin,RetrieveModelMixin
 from rest_framework.generics import GenericAPIView,CreateAPIView
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+from .forms import PhoneLoginForm,PhoneVerifyForm
+from django.http import HttpResponseNotFound
+from django.contrib.auth import get_user_model
+from django.contrib.auth import logout
+
+
 
 
 class UserViewSet(BaseUserViewSet):
@@ -345,3 +354,90 @@ class MarketerViewSet(CreateModelMixin,GenericViewSet):
         serializer1 = serializers.MarketerSerializer(marketer)
         
         return Response(serializer1.data, status=status.HTTP_201_CREATED, headers=headers)
+    
+
+
+def verify(request):
+    if request.method == 'POST':
+        form = PhoneVerifyForm(request.POST)
+        phone_number = request.session.get('phone_number',None)
+        print(phone_number)
+        next_url = request.session.get('next')
+        if form.is_valid():
+            otp = form.cleaned_data.get('otp')
+            if phone_number and otp:
+                five_minutes_ago = datetime.now() - timedelta(minutes=5)
+                customerOtpStack.objects.filter(dateTime__lt= five_minutes_ago).delete()
+                user_id = request.session.get('user',None)
+                print(user_id)
+                user = User.objects.get(pk = user_id)
+                obj = customerOtpStack.objects.filter(phoneNumber = phone_number)
+                if obj is not None:
+                    for i in obj:
+                        if  i.otp == otp:
+                            print(phone_number)
+                            print(user)
+                            print(next_url)
+                            if user is not None:
+                                print(login(request, user,backend='django.contrib.auth.backends.ModelBackend'))
+                                request.session.pop('phone_number')
+                                request.session.pop('user')
+                                messages.success(request, 'Logged in successfully.')
+                                if next_url is None:
+                                    return render(request,'sucess.html') 
+                                return redirect(next_url)
+                            
+                else:
+                    messages.error(request, 'OTP is incorrect.')
+                    return redirect('verify')
+    else:
+        form = PhoneVerifyForm(request.POST)
+        return render(request, 'verify.html', {'form': form})
+    return HttpResponseNotFound('Page not found')
+
+
+
+
+def phone_login(request):
+    next_url = request.GET.get('next', None)
+    if request.method == 'POST':
+        form = PhoneLoginForm(request.POST)
+        if form.is_valid():
+            phone_number = form.cleaned_data.get('phoneNumber')
+            print(phone_number)
+            try:
+                user  = User.objects.get(phoneNumber = phone_number)
+            except User.DoesNotExist:
+                user= None
+            print(user)
+            if user is not None:
+                request.session['user'] = user.id
+                # otp = send_otp(user)
+                otp=random.randrange(1000,9999)
+                if otp:
+                    print(otp)
+                    five_minutes_ago = datetime.now() - timedelta(minutes=5)
+                    customerOtpStack.objects.filter(dateTime__lt= five_minutes_ago).delete()
+                    customerOtpStack.objects.create(phoneNumber = phone_number,otp = otp)
+                    request.session['phone_number'] = phone_number
+                    print(request.session.get('phone_number'))
+                    request.session['next'] = next_url
+                    return redirect('verify')
+                else:
+                    messages.error(request, f'Otp error')
+                    return redirect('login')
+
+            else:
+                messages.error(request, f'Account Not Exist')
+                return redirect('login')
+
+    else:
+        form = PhoneLoginForm()
+    return render(request, 'login.html', {'form': form})
+
+
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
