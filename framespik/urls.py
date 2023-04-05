@@ -19,7 +19,7 @@ import debug_toolbar
 from users.views import UserViewSet
 from django.conf import settings
 from django.conf.urls.static import static
-from event.views import eventwebpage,albumimagewebpage,getEventInvitation,imageSelection
+from event.views import eventwebpage,albumimagewebpage,getEventInvitation,imageSelection,submitEventKey,get
 from organization.views import organizationWebPage,getOrganizationEcard
 from users.views import phone_login,verify,logout_view
 
@@ -37,11 +37,12 @@ urlpatterns = [
     path('event/invite/<uniquecode>',getEventInvitation),
     path('organization/<uniquecode>',organizationWebPage),
     path('organization/ecard/<uniquecode>',getOrganizationEcard),
-    path('imageselection/<int:event_id>/<int:album_id>',imageSelection),
+    path('imageselection/<int:album_id>/',imageSelection,name = 'imageselection'),
+    path('submiteventkey/<int:album_id>/', submitEventKey , name='submiteventkey'),
     path('login/', phone_login, name='login'),
     path('verify/', verify, name='verify'),
     path('logout/', logout_view, name='logout'),
-
+    path('get/',get)
     ]
 
 urlpatterns+=static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT) 

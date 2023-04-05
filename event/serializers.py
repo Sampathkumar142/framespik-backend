@@ -44,14 +44,14 @@ class OrganizationEventScheduleSerializer(serializers.ModelSerializer):
     event = serializers.StringRelatedField(read_only =True)
     class Meta:
         model = models.OrganizationEventSchedule
-        fields = ['id','organization','event','title','description','isEventDate','createdAt','scheduleAt','status']
+        fields = ['id','organization','event','title','description','isEventDate','createdAt','scheduleAt','status','scheduleTime']
     
 
 class OrganizationEventScheduleCreateSerializer(serializers.ModelSerializer):
     organization_id = serializers.IntegerField()
     class Meta:
         model = models.OrganizationEventSchedule
-        fields = ['id','organization_id','event','title','description','scheduleAt']
+        fields = ['id','organization_id','event','title','description','scheduleAt','scheduleTime']
 
 
 

@@ -21,7 +21,9 @@ import datetime
 from django.conf import settings
 import concurrent.futures
 from django.contrib.auth.decorators import permission_required,user_passes_test,login_required
-
+import json
+from django.shortcuts import redirect
+from django.urls import reverse
 
 
 # Create your views here.
@@ -410,24 +412,53 @@ def getEventInvitation(request,uniquecode):
 
 
 
-def has_permission(user, view_func):
-    def wrapper(request, *args, **kwargs):
-        album_id = kwargs.get('album_id')
-        event_id = kwargs.get('event_id')
-        album = get_object_or_404(models.Album, id=album_id, event_id=event_id)
-        customer_id =[ i.id for i in album.event.customer.all()]
-        if album.isPublic and (album.event.user == user or user.id in customer_id) :
-            return view_func(request, album_id=album_id, event_id=event_id, *args, **kwargs)
-        else:
-            return render(request, 'access_denied.html')
-    return wrapper
 
 
-@login_required(login_url='/login/')
-@user_passes_test(lambda u: has_permission(u, imageSelection))
-def imageSelection(request, album_id, event_id):
-    album = get_object_or_404(models.Album, id=album_id, event_id=event_id)
+
+def imageSelection(request, album_id):
+    event_key = request.GET.get('event_key')
+    if not event_key:
+        new_url = reverse('submiteventkey', args=[album_id])
+        return redirect(new_url)
+    album = get_object_or_404(models.Album, id=album_id)
+    if album.event.securityKey != int(event_key):
+        return render(request, 'access_denied.html') 
     images = album.images.all()
     imagesdata = serializers.AlbumImageSerializer(images, many=True)
-    print(imagesdata.data)
     return render(request, 'image_selection.html', {'album': album, 'images': imagesdata.data})
+
+
+
+def submitEventKey(request, album_id):
+    if request.method == 'POST':
+        event_key = request.POST.get('event_key')
+        print(event_key)
+        if event_key:
+            return redirect(f'/imageselection/{album_id}/?event_key={event_key}')
+    
+    # If the form is not submitted or event_key is not valid, render the enter_event_key template again
+    return render(request, 'enter_event_key.html', {'album_id': album_id})
+
+
+from googleapiclient.errors import HttpError
+# from google.oauth2.credentials import Credentials
+from django.core.mail import send_mail,EmailMessage
+from framespik.settings import EMAIL_HOST_USER
+
+
+
+
+def get(request):
+    try:
+        email = EmailMessage(
+            'greeting',
+            'hi this is navapsAtom Team Welcomes you to collabrate',
+            'navapatomsteam@gmail.com',
+            ['praveenchowdary434@gmail.com'],
+            reply_to=['praveensampathkumar.parvathini.com'],
+        )
+        email.send()
+        message = 'hi this is navapsAtom Team Welcomes you to collabrate'
+    except HttpError as error:
+        message = f'An error occurred: {error}'
+    return HttpResponse(message)

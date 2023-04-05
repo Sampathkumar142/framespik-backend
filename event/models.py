@@ -11,6 +11,12 @@ import string
 
 
 # ____________________________ Events  ____________________
+def generate_unique_digit(length=6):
+    while True:
+        random_string = ''.join(random.choices(string.digits, k=length))
+        if not Event.objects.filter(securityKey=random_string).exists():
+            return random_string
+
 class Event(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     name = models.CharField(max_length=250)
@@ -23,6 +29,9 @@ class Event(models.Model):
     time = models.TimeField(null=True,blank=True)
     quotation = models.IntegerField()
     isActive = models.BooleanField()
+
+
+    securityKey = models.IntegerField(unique=True,default=generate_unique_digit)
 
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
     mutuals = models.ManyToManyField(Customer, related_name='mutualEvents',blank=True)
@@ -47,7 +56,8 @@ class Event(models.Model):
                 title=self.name,
                 isEventDate=True,
                 scheduleAt=self.date,
-                event_id = self.pk
+                event_id = self.pk,
+                scheduleTime = self.time|None
             )
             event_webpage = EventWebpage.objects.create(
                 event_id = self.pk,
@@ -369,12 +379,14 @@ class OrganizationEventSchedule(models.Model):
     description = models.TextField(null=True,blank=True)
     isEventDate = models.BooleanField(default=False)
     createdAt = models.DateTimeField(auto_now=True)
-    scheduleAt = models.DateTimeField()
+    scheduleAt = models.DateField()
+    scheduleTime = models.TimeField()
     status = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return self.title
     
+
 
 
 

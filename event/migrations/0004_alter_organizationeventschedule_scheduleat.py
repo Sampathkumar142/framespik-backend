@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0001_initial'),
+        ('event', '0003_initial'),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='avatar',
-            name='gender',
-            field=models.CharField(choices=[('O', 'Other'), ('F', 'Female'), ('M', 'Male')], max_length=1),
+            model_name='organizationeventschedule',
+            name='scheduleAt',
+            field=models.DateField(),
         ),
     ]

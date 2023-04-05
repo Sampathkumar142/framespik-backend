@@ -6,6 +6,8 @@ from pathlib import Path
 import socket
 import os 
 
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -50,6 +52,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'debug_toolbar',
     'django_filters',
+    'scheduleapp',
     'channels',
     'channels_redis',
     'api',
@@ -171,6 +174,18 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'navapatomsteam@gmail.com'
+EMAIL_HOST_PASSWORD ='bxcmpskmappruvhd'
+EMAIL_USE_TLS = True
+EMIAL_USE_SSL =True
+
+
+
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

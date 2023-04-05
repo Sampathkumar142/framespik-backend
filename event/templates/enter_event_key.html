@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Enter Event Key</h1>
+  <form method="POST">
+    {% csrf_token %}
+    <label for="event-key">Event Key:</label>
+    <input type="number" name="event_key" id="event-key" required>
+    <button type="submit">Submit</button>
+  </form>
+{% endblock %}
