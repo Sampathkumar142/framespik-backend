@@ -3,6 +3,9 @@
 {% block content %}
 
 <h2>{{ album.title }}</h2>
+<div>
+  <button id="muteButton"><i class="fa fa-microphone"></i></button>
+</div>
 
 <div id="image-container">
   {% for image in images %}
@@ -101,6 +104,7 @@ h2 {
  <script>
   const albumId = {{ album.id }};
   const socketUrl = `ws://${window.location.host}/ws/album/${albumId}/`;
+  
 
   const imageContainer = document.getElementById('image-container');
   const imageItems = imageContainer.getElementsByClassName("image-item");
@@ -155,6 +159,87 @@ imageContainer.addEventListener("change", (event) => {
    socket.onclose = function(e) {
             console.error('Chat socket closed unexpectedly');
     };
+
+
+
+// Get mute button element
+const muteButton = document.getElementById('muteButton');
+
+ // Set up audio stream
+navigator.mediaDevices.getUserMedia({audio: true}).then(stream => {
+  const audioContext = new AudioContext();
+  const input = audioContext.createMediaStreamSource(stream);
+  const processor = audioContext.createScriptProcessor(1024, 1, 1);
+  const source = input.connect(processor);
+  const destination = processor.connect(audioContext.destination);
+
+  // Process audio data and send it to server via WebSocket
+  processor.onaudioprocess = e => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    const inputData = e.inputBuffer.getChannelData(0);
+
+    ws.send(inputData);
+  };
+
+  // Handle mute button clicks
+  let isMuted = false;
+  muteButton.addEventListener('click', () => {
+    if (isMuted) {
+      muteButton.innerHTML = '<i class="fa fa-microphone"></i>';
+      processor.disconnect(audioContext.destination);
+    } else {
+      muteButton.innerHTML = '<i class="fa fa-microphone-slash"></i>';
+      processor.connect(audioContext.destination);
+    }
+    isMuted = !isMuted;
+  });
+}).catch(err => {
+  console.error(err);
+  alert('Failed to get audio stream');
+});
+//Set up WebSocket connection
+  const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+  const wsUrl = `ws://${window.location.host}/ws/voice/${albumId}/`;
+
+  const ws = new WebSocket(wsUrl);
+  ws.addEventListener('open', function (event) {
+    console.log('Audio WebSocket connected!');
+  });
+
+
+
+ws.onmessage = e => {
+  const audioData = e.data;
+  {% comment %} console.log(audioData) {% endcomment %}
+// Create an AudioContext object
+  const audioContext = new AudioContext();
+
+// Create a script processor node to receive audio data
+  const processor = audioContext.createScriptProcessor(1024, 1, 1);
+  processor.onaudioprocess = audioData => {
+  // Get the audio data from the input buffer
+  const inputData = e.inputBuffer.getChannelData(0);
+  // Process the audio data here
+
+  // Create a new output buffer with the same data as input buffer
+  const outputData = new Float32Array(inputData.length);
+  outputData.set(inputData);
+
+  // Create an AudioBufferSourceNode to play the output buffer
+  const source = audioContext.createBufferSource();
+  const buffer = audioContext.createBuffer(1, outputData.length, audioContext.sampleRate);
+  buffer.getChannelData(0).set(outputData);
+  source.buffer = buffer;
+  source.connect(audioContext.destination);
+  source.start();
+};
+
+// Connect the script processor node to the destination (i.e. speakers)
+processor.connect(audioContext.destination);
+
+};
+
+
 
 
 

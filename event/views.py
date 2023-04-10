@@ -24,6 +24,7 @@ from django.contrib.auth.decorators import permission_required,user_passes_test,
 import json
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 
 
 # Create your views here.
@@ -350,7 +351,7 @@ class DigitalInvitationViewSet(ModelViewSet):
         return serializers.DigitalInvitationSerializer
     queryset = models.DigitalInvitation.objects.all()
 
-
+@csrf_exempt
 def eventwebpage(request,uniquecode):
     try:
         webpage =models.EventWebpage.objects.select_related('event').select_related('music').select_related('template').get(passCode = uniquecode)
@@ -373,7 +374,7 @@ def eventwebpage(request,uniquecode):
     except models.EventWebpage.DoesNotExist:
         return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
 
-
+@csrf_exempt
 def albumimagewebpage(request,uniquecode,pk):
     try:
         webpage =models.EventWebpage.objects.select_related('event').get(passCode = uniquecode)
@@ -394,7 +395,7 @@ def albumimagewebpage(request,uniquecode,pk):
         return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
 
 
-
+@csrf_exempt
 def getEventInvitation(request,uniquecode):
     try: 
         eventinvitation = models.EventInvitation.objects.select_related('event').select_related('category').select_related('music').select_related('template').get(passCode = uniquecode)
@@ -445,20 +446,21 @@ from googleapiclient.errors import HttpError
 from django.core.mail import send_mail,EmailMessage
 from framespik.settings import EMAIL_HOST_USER
 
-
+# from scheduleapp.tasks import send_email
 
 
 def get(request):
-    try:
-        email = EmailMessage(
-            'greeting',
-            'hi this is navapsAtom Team Welcomes you to collabrate',
-            'navapatomsteam@gmail.com',
-            ['praveenchowdary434@gmail.com'],
-            reply_to=['praveensampathkumar.parvathini.com'],
-        )
-        email.send()
-        message = 'hi this is navapsAtom Team Welcomes you to collabrate'
-    except HttpError as error:
-        message = f'An error occurred: {error}'
-    return HttpResponse(message)
+    # try:
+    #     email = EmailMessage(
+    #         'greeting',
+    #         'hi this is navapsAtom Team Welcomes you to collabrate',
+    #         'navapatomsteam@gmail.com',
+    #         ['praveenchowdary434@gmail.com'],
+    #         reply_to=['praveensampathkumar.parvathini.com'],
+    #     )
+    #     email.send()
+    #     message = 'hi this is navapsAtom Team Welcomes you to collabrate'
+    # except HttpError as error:
+    #     message = f'An error occurred: {error}'
+    # send_email.apply_async(args=['Hello'])
+    return HttpResponse('ok')

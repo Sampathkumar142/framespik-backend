@@ -15,7 +15,7 @@ from channels.auth import AuthMiddlewareStack
 # from .routing import channel_routing
 from channels.security.websocket import AllowedHostsOriginValidator
 from django.urls import path,re_path
-from event.consumers  import AlbumConsumer
+from event.consumers  import AlbumConsumer,AudioConsumer
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'framespik.settings')
 
@@ -29,7 +29,7 @@ application = ProtocolTypeRouter({
         AuthMiddlewareStack(
             URLRouter([
                 re_path(r'^ws/album/(?P<album_id>\d+)/$', AlbumConsumer.as_asgi()),
-            ])
+                path('ws/voice/<int:album_id>/',AudioConsumer.as_asgi())         ])
         )
     ),
 })

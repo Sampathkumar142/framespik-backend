@@ -10,7 +10,7 @@ OrganizationEventCategory,
 OrganizationTier,
 Organization,
 )
-from .models import OrganizationWebpageTemplate, OrganizationWebpage, OrganizationEcardTemplate, OrganizationEcard
+from .models import OrganizationWebpageTemplate, OrganizationWebpage, OrganizationEcardTemplate, OrganizationEcard,OrganizationSchedule
 
 
 @admin.register(FeatureCategory)
@@ -43,6 +43,8 @@ class OrganizationTierAdmin(admin.ModelAdmin):
 
 @admin.register(Organization)
 class OrganizationAdmin(admin.ModelAdmin):
+    icon_name ='business'
+    name ='Organization (photo studios)'
     list_display = ['name', 'category', 'tier', 'proprietor', 'status', 'lastUpdated']
     search_fields = ['name', 'proprietor__username']
     list_filter = ['category', 'tier', 'status']
@@ -76,6 +78,13 @@ class OrganizationEcardAdmin(admin.ModelAdmin):
     list_filter = ('isActive', 'organization', 'template')
 
 
+class OrganizationScheduleAdmin(admin.ModelAdmin):
+    list_display = ('id', 'organization', 'title', 'createdAt', 'scheduledAt', 'status')
+    list_filter = ('organization', 'createdAt', 'scheduledAt', 'status')
+    search_fields = ('title', 'description')
+    ordering = ('-scheduledAt',)
+
+admin.site.register(OrganizationSchedule, OrganizationScheduleAdmin)
 admin.site.register(OrganizationWebpageTemplate, OrganizationWebpageTemplateAdmin)
 admin.site.register(OrganizationWebpage, OrganizationWebpageAdmin)
 admin.site.register(OrganizationEcardTemplate, OrganizationEcardTemplateAdmin)

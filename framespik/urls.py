@@ -23,6 +23,15 @@ from event.views import eventwebpage,albumimagewebpage,getEventInvitation,imageS
 from organization.views import organizationWebPage,getOrganizationEcard
 from users.views import phone_login,verify,logout_view
 
+
+
+admin.site.site_header = 'Framespik'
+admin.site.enable_nav_sidebar = True
+admin.site.site_title = 'Admin • Framespik'
+admin.site.index_title = 'Welcome'
+admin.site.name = 'Framespik'
+admin.site.site_url = '../'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('__debug__/', include(debug_toolbar.urls)),

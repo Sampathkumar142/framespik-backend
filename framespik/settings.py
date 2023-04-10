@@ -5,6 +5,9 @@ from datetime import timedelta
 from pathlib import Path
 import socket
 import os 
+from django.utils.translation import gettext_lazy as _
+from celery.schedules import crontab
+
 
 
 
@@ -42,19 +45,23 @@ OTP_EXPIRE_IN_MIN = 10
 
 INSTALLED_APPS = [
     'daphne',
-    'django.contrib.admin',
+    # 'django.contrib.admin',
+    'material',
+    'material.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+    'corsheaders',
     'rest_framework',
     'debug_toolbar',
     'django_filters',
     'scheduleapp',
     'channels',
     'channels_redis',
+    'django_celery_beat',
     'api',
     'core',
     'organization',
@@ -92,6 +99,7 @@ SIMPLE_JWT = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -215,7 +223,9 @@ TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
+
+USE_L10N = True
 
 
 
@@ -227,3 +237,69 @@ MEDIA_ROOT =os.path.join(BASE_DIR,'media')
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MATERIAL_ADMIN_SITE = {
+    'HEADER':  ('Framespik'),  # Admin site header
+    'TITLE':  ('Admin • Framespik'),  # Admin site title
+    # Admin site favicon (path to static should be specified)
+    'FAVICON':  'base/logo.svg',
+    'MAIN_BG_COLOR':  '#6a1cc8 ',  # Admin site main color, css color should be specified
+    # Admin site main hover color, css color should be specified
+    'MAIN_HOVER_COLOR':  '#010101',
+    # Admin site profile picture (path to static should be specified)
+    'PROFILE_PICTURE':  'base/logo.svg',
+    # Admin site profile background (path to static should be specified)
+    'PROFILE_BG':  'base/logoout.jpg',
+    # Admin site logo on login page (path to static should be specified)
+    'LOGIN_LOGO':  'base/logo.svg',
+    # Admin site background on login/logout pages (path to static should be specified)
+    'LOGOUT_BG':  'base/logoout.jpg',
+    'SHOW_THEMES':  False,  # Show default admin themes button
+    'TRAY_REVERSE': False,  # Hide object-tools and additional-submit-line by default
+    'NAVBAR_REVERSE': False,  # Hide side navbar by default
+    'SHOW_COUNTS': False,  # Show instances counts for each model
+    'APP_ICONS': {  # Set icons for applications(lowercase), including 3rd party apps, {'application_name': 'material_icon_name', ...}
+        'sites': 'send',
+    },
+    'MODEL_ICONS': {  # Set icons for models(lowercase), including 3rd party models, {'model_name': 'material_icon_name', ...}
+        'site': 'contact_mail',
+    }
+}
+
+#cors headers
+
+CORS_ALLOWED_ORIGINS = []
+CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOW_METHODS = [
+'DELETE',
+'GET',
+'OPTIONS',
+'PATCH',
+'POST',
+'PUT',
+]
+
+
+CORS_ALLOW_HEADERS = [
+'accept',
+'accept-encoding',
+'authorization',
+'content-type',
+'dnt',
+'origin',
+'user-agent',
+'x-csrftoken',
+'x-requested-with',
+]
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+REDBEAT_REDIS_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+CELERY_TIMEZONE = 'Asia/Kolkata'
+CELERY_BEAT_TIMEZONE ='Asia/Kolkata'
+
+

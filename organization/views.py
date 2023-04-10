@@ -8,7 +8,7 @@ from rest_framework import status
 from utilitys import pCloud
 from  rest_framework.views import APIView
 from affiliate.models import OrganizationCommision
-from accounts.models import EMI,EMIPayment
+from accounts.models import Payment,EMIPayment
 from django.db.models import Q,Count
 from datetime import date,timedelta,timezone
 import datetime
@@ -89,7 +89,7 @@ class OrganizationInfoViewSet(APIView):
             dict.update({"events":[{"id":i.id,"name":i.name,"category":i.category.title,"date":i.date,"thumb":i.thumb,"avatar":i.customer.user.avatar.thumb} for i in event[:4]]})
         
 
-        emi = EMI.objects.filter(organization_id=organization_id).order_by('-startDate').first()
+        emi = Payment.objects.filter(organization_id=organization_id).order_by('-startDate').first()
         if organization is not None and emi is not None:
             emipayment = EMIPayment.objects.filter(emi_id=emi.id).order_by('paymentDate').filter(Q(paymentDate__month=date.today().month) & Q(status='DUE'))
             if organization.emiPayable == True:

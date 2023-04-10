@@ -161,8 +161,6 @@ class Organization(models.Model):
     status = models.CharField(
         max_length=1, choices=STATUS_CHOICE, default=ACTIVE)
     lastUpdated = models.DateTimeField(auto_now=True)
-    plan = models.ForeignKey(Plan, on_delete=models.PROTECT,null=True,blank =True)
-    customPlan = models.ForeignKey(CustomPlan, on_delete=models.PROTECT,null=True,blank =True)
 
     def __str__(self) -> str:
         return self.name

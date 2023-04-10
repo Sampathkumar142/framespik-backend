@@ -14,7 +14,7 @@ class UserCreateSerializer(BaseUserCreateSerializer):
     class Meta(BaseUserCreateSerializer.Meta):
         fields = ['id','phoneNumber','email','name','avatar','dateOfBirth']
     
-    
+
 
 
 class UserSerializer(BaseUserSerializer):

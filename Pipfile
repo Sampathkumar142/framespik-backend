@@ -21,6 +21,13 @@ google-auth = "*"
 google-auth-oauthlib = "*"
 google-auth-httplib2 = "*"
 google-api-python-client = "*"
+django-material-admin = "*"
+django-cors-headers = "*"
+celery = "*"
+django-celery-beat = "*"
+django-db = "*"
+sqlalchemy = "*"
+pytz = "*"
 
 [dev-packages]
 autopep8 = "*"

@@ -7,6 +7,8 @@ from organization.models import Organization, OrganizationEventCategory
 from .validators import FileValidator
 import random
 import string
+from django.utils import timezone
+
 
 
 
@@ -104,7 +106,7 @@ class EventTransaction(models.Model):
     event = models.ForeignKey(Event, on_delete=models.PROTECT,related_name='transaction')
     value = models.IntegerField()
     mode = models.ForeignKey(TransactionMode, on_delete=models.PROTECT)
-    date = models.DateTimeField(auto_now=True)
+    date = models.DateTimeField(default=timezone.now)
 
     
     # **************** Payment Gateway *******************
@@ -127,7 +129,7 @@ class EventWebpageTemplate(models.Model):
     templateOverview = models.ImageField(upload_to=f'eventtemplates/webtemplateoverview')
     templateName = models.CharField(max_length=100)
     htmlFile = models.FileField(upload_to=get_file_path,validators=[FileValidator(['html'])])
-    uploadedAt = models.DateTimeField(auto_now_add = True)
+    uploadedAt = models.DateTimeField(default=timezone.now)
 
 
 
@@ -204,7 +206,7 @@ class EventInvitationTemplate(models.Model):
     templateOverview = models.ImageField(upload_to=f'eventtemplates/invitationtemplateoverview')
     templateName = models.CharField(max_length=100)
     htmlFile = models.FileField(upload_to=get_invitation_template_path,validators=[FileValidator(['html'])])
-    uploadedAt = models.DateTimeField(auto_now_add = True)
+    uploadedAt = models.DateTimeField(default=timezone.now)
 
 
     # def save(self, *args, **kwargs):
@@ -295,7 +297,7 @@ class EventWish(models.Model):
 # ___________________________ Event Payment Remainders ________________________
 class EventPaymentRemainder(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE,related_name='paymentremainder')
-    dateTime = models.DateTimeField(auto_now_add=True)
+    dateTime = models.DateTimeField(default=timezone.now)
 
 
 
@@ -310,7 +312,7 @@ class DigitalInvitationTemplate(models.Model):
     templateOverview = models.ImageField(upload_to=f'eventtemplates/digitalinvitationtemplateoverview')
     templateName = models.CharField(max_length=100)
     htmlFile = models.FileField(upload_to=get_digital_invitation_template_path,validators=[FileValidator(['html'])])
-    uploadedAt = models.DateTimeField(auto_now_add = True)
+    uploadedAt = models.DateTimeField(default=timezone.now)
 
     def save(self, *args, **kwargs):
         condition = not  self.templateName
@@ -339,7 +341,7 @@ class DigitalInvitationLog(models.Model):
     event = models.ForeignKey(Event, on_delete=models.PROTECT)
     customer = models.ForeignKey(
         Customer, on_delete=models.PROTECT)
-    dateTime = models.DateTimeField(auto_now_add=True)
+    dateTime = models.DateTimeField(default=timezone.now)
     template = models.ForeignKey(
         DigitalInvitationTemplate, on_delete=models.PROTECT)
     isWhatsappInvitation = models.BooleanField()
@@ -356,7 +358,7 @@ class TargetedAudient(models.Model):
     # name of the targeted audient
     audientName = models.CharField(max_length=120, null=True, blank=True)
     phoneNumber = models.CharField(max_length=12)
-    dateTime = models.DateTimeField(auto_now_add=True)
+    dateTime = models.DateTimeField(default=timezone.now)
 
 
 # ___________________________ Invitation Structure ________________________________
@@ -367,7 +369,7 @@ class DigitalInvitation(models.Model):
     """
     log = models.ForeignKey(DigitalInvitationLog, on_delete=models.CASCADE,related_name='invitations')
     audient = models.ForeignKey(TargetedAudient, on_delete=models.PROTECT)
-    dateTime = models.DateTimeField(auto_now_add=True)
+    dateTime = models.DateTimeField(default=timezone.now)
 
 
 
@@ -378,7 +380,7 @@ class OrganizationEventSchedule(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField(null=True,blank=True)
     isEventDate = models.BooleanField(default=False)
-    createdAt = models.DateTimeField(auto_now=True)
+    createdAt = models.DateTimeField(default=timezone.now)
     scheduleAt = models.DateField()
     scheduleTime = models.TimeField()
     status = models.BooleanField(default=False)

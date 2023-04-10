@@ -80,3 +80,39 @@ class AlbumConsumer(AsyncWebsocketConsumer):
             'position': position,
             'priority': priority
         }))
+
+
+class AudioConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.album_id = self.scope['url_route']['kwargs']['album_id']
+        print(self.album_id)
+        self.album_group_name = 'voice_%s' % self.album_id
+        await self.channel_layer.group_add(
+            self.album_group_name,
+            self.channel_name
+        )
+        await self.accept()
+
+    async def disconnect(self, close_code):
+         await self.channel_layer.group_discard(
+            self.album_group_name,
+            self.channel_name
+        )
+
+
+    async def receive(self, text_data=None,bytes_data=None):
+        print(bytes_data)
+        # Send message to room group
+        await self.channel_layer.group_send(
+            self.album_group_name,
+            {
+                'type': 'audio_message',
+                'bytes_data': bytes_data
+            }
+        )
+
+    async def audio_message(self, event):
+        bytes_data = event['bytes_data']
+
+        # Send message to WebSocket
+        await self.send(bytes_data=bytes_data)
